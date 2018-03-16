@@ -53,6 +53,9 @@ class MetaCrocubotOracle(CrocubotOracle):
     def _filter_universe_from_data_for_prediction(self, data, *args):
         return data
 
+    def verify_pricing_data(self, predict_data):
+        pass
+
     def predict(self, data, current_timestamp, target_timestamp):
 
         return self._do_predict(data, current_timestamp, target_timestamp)

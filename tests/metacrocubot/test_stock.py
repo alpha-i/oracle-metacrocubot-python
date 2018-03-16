@@ -13,6 +13,8 @@ from alphai_delphi.data_source.synthetic_data_source import SyntheticDataSource
 from alphai_metacrocubot_oracle.datasource import DataSource
 from alphai_metacrocubot_oracle.oracle import MetaCrocubotOracle
 
+CALENDAR_NAME = "JSE"
+
 OUTPUT_DIR = tempfile.TemporaryDirectory().name
 RESOURCES_DIR = os.path.join(os.path.dirname(__file__), '..', 'resources')
 
@@ -110,24 +112,23 @@ class TestMetaCrocubot(unittest.TestCase):
         }
 
         scheduling_configuration = {
-            "prediction_frequency": {"frequency_type": "WEEKLY", "days_offset": 0, "minutes_offset": 75},
-            "training_frequency": {"frequency_type": "WEEKLY", "days_offset": 0, "minutes_offset": 60}
+            "prediction_frequency": {"frequency_type": "MONTHLY", "days_offset": -1, "minutes_offset": 0},
+            "training_frequency": {"frequency_type": "MONTHLY", "days_offset": -1, "minutes_offset": 0}
         }
 
         oracle = MetaCrocubotOracle(
-            calendar_name="NYSE",
+            calendar_name=CALENDAR_NAME,
             oracle_configuration=oracle_configuration,
             scheduling_configuration=scheduling_configuration
         )
 
         simulation_start = datetime.datetime(2017, 5, 1, tzinfo=pytz.utc)
         simulation_end = datetime.datetime(2017, 9, 29, tzinfo=pytz.utc)
-        calendar_name = 'NYSE'
 
         scheduler = Scheduler(
             simulation_start,
             simulation_end,
-            calendar_name,
+            CALENDAR_NAME,
             oracle.prediction_frequency,
             oracle.training_frequency,
         )
@@ -135,7 +136,7 @@ class TestMetaCrocubot(unittest.TestCase):
         oracle_performance = OraclePerformance(OUTPUT_DIR, 'oracle')
 
         datasource = DataSource({
-            'data_file': os.path.join(RESOURCES_DIR, 'test_stock_data')
+            'data_file': os.path.join(RESOURCES_DIR, 'test_stock_data.hdf5')
         })
 
         controller = Controller(
