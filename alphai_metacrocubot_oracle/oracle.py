@@ -175,6 +175,10 @@ class OraclePrediction:
 
     @property
     def features_sensitivity(self):
+        """
+        returns the dict with features as key and value as a sensitivity
+        :return dict:
+        """
         return self._feature_sensitivity
 
     def __repr__(self):
