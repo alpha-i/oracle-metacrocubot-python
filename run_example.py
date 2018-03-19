@@ -6,6 +6,7 @@ import pytz
 from alphai_delphi import OraclePerformance, Controller, Scheduler
 
 from alphai_metacrocubot_oracle.datasource import DataSource
+from alphai_metacrocubot_oracle.oracle import MetaCrocubotOracle
 
 CALENDAR_NAME = "JSEEOM"
 
