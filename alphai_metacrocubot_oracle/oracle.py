@@ -58,7 +58,17 @@ class MetaCrocubotOracle(CrocubotOracle):
 
     def predict(self, data, current_timestamp, target_timestamp):
 
-        return self._do_predict(data, current_timestamp, target_timestamp)
+        prediction_result = self._do_predict(data, current_timestamp, target_timestamp)
+
+        # loop throught the feature, create a prediction to add sensitivity
+        # for feature in feature_to_calculate
+        #   feature_data = deepcopy(data)
+        #   del feature_data[feature]
+        #   result = self._do_predict(data, current_timestamp, target_timestamp)
+        #   sensitivity = self._calculate_sensitivity(prediction_result, result)
+        #   prediction_result.add_feature_sensitivity(feature, sensitivity)
+
+        return prediction_result
 
     def _do_predict(self, data, current_timestamp, target_timestamp):
         """
@@ -153,6 +163,20 @@ class OraclePrediction:
         self.upper_bound = upper_bound
         self.prediction_timestamp = prediction_timestamp
         self.covariance_matrix = pd.DataFrame()
+        self._feature_sensitivity = {}
+
+    def add_feature_sensitivity(self, feature, sensitivity):
+        """
+        Add feature sensitivity value
+        :param feature:
+        :param sensitivity:
+        :return:
+        """
+        self._feature_sensitivity[feature] = sensitivity
+
+    @property
+    def features_sensitivity(self):
+        return self._feature_sensitivity
 
     def __repr__(self):
         return "<Oracle prediction: {}>".format(self.__dict__)
