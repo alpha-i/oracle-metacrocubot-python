@@ -28,6 +28,9 @@ class MetaCrocubotOracle(CrocubotOracle):
         self._target_feature = self._data_transformation.get_target_feature()
         self._n_features = len(self._data_transformation.features)
 
+    def _sanity_check(self):
+        pass
+
     def _init_universe_provider(self):
         pass
 
@@ -121,10 +124,6 @@ class MetaCrocubotOracle(CrocubotOracle):
 
         means, conf_low, conf_high = self._data_transformation.inverse_transform_multi_predict_y(predict_y, symbols)
         self.log_validity_of_predictions(means, conf_low, conf_high)
-
-        # means_pd = pd.DataFrame(data=means.T, columns=[target_timestamp], index=symbols)
-        # conf_low_pd = pd.DataFrame(data=conf_low.T, columns=[target_timestamp], index=symbols)
-        # conf_high_pd = pd.DataFrame(data=conf_high.T, columns=[target_timestamp], index=symbols)
 
         means_series = pd.Series(np.squeeze(means), index=symbols)
         conf_low_series = pd.Series(np.squeeze(conf_low), index=symbols)
