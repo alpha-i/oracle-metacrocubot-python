@@ -396,19 +396,13 @@ class TestDataSource(unittest.TestCase):
 
         assert set(returns.columns).issubset(all_symbols)
 
-
     def test_values_for_symbols_feature_and_time(self):
 
         values = self.datasource.values_for_symbols_feature_and_time(
          ['HCI', 'SNT'],
          'Returns',
-         datetime(2017, 9, 29)
+         datetime(2017, 9, 29, 7)
         )
 
         assert values['HCI'] == -0.292391161
         assert values['SNT'] == -0.137834485
-
-
-
-
-

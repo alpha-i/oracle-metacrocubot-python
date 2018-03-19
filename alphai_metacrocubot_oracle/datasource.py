@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import pandas as pd
 
 from alphai_delphi import AbstractDataSource
@@ -15,12 +13,14 @@ class DataSource(AbstractDataSource):
         with pd.HDFStore(raw_data_file) as store:
             dataframe = store.get('data')
 
+        dataframe.index = dataframe.index.map(lambda t: t.replace(hour=7))
+        dataframe.index = dataframe.index.tz_localize('UTC')
         features = set(dataframe.columns) - {'DateStamps', 'Ticker'}
         self._data = {feature: dataframe.pivot(columns='Ticker', values=feature) for feature in features}
 
     def get_data(self, current_datetime, interval):
 
-        start_date = current_datetime - interval
+        start_date = current_datetime - (interval * 31)
         end_date = current_datetime
 
         data = {
@@ -39,9 +39,6 @@ class DataSource(AbstractDataSource):
         symbol_data = feature_data[symbol_list]
 
         return symbol_data.loc[current_datetime]
-
-
-
 
     @property
     def start(self):

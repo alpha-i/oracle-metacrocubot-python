@@ -28,6 +28,9 @@ class MetaCrocubotOracle(CrocubotOracle):
         self._target_feature = self._data_transformation.get_target_feature()
         self._n_features = len(self._data_transformation.features)
 
+    def _sanity_check(self):
+        pass
+
     def _init_universe_provider(self):
         pass
 
@@ -53,9 +56,22 @@ class MetaCrocubotOracle(CrocubotOracle):
     def _filter_universe_from_data_for_prediction(self, data, *args):
         return data
 
+    def verify_pricing_data(self, predict_data):
+        pass
+
     def predict(self, data, current_timestamp, target_timestamp):
 
-        return self._do_predict(data, current_timestamp, target_timestamp)
+        prediction_result = self._do_predict(data, current_timestamp, target_timestamp)
+
+        # loop throught the feature, create a prediction to add sensitivity
+        # for feature in feature_to_calculate
+        #   feature_data = deepcopy(data)
+        #   del feature_data[feature]
+        #   result = self._do_predict(data, current_timestamp, target_timestamp)
+        #   sensitivity = self._calculate_sensitivity(prediction_result, result)
+        #   prediction_result.add_feature_sensitivity(feature, sensitivity)
+
+        return prediction_result
 
     def _do_predict(self, data, current_timestamp, target_timestamp):
         """
@@ -109,10 +125,6 @@ class MetaCrocubotOracle(CrocubotOracle):
         means, conf_low, conf_high = self._data_transformation.inverse_transform_multi_predict_y(predict_y, symbols)
         self.log_validity_of_predictions(means, conf_low, conf_high)
 
-        # means_pd = pd.DataFrame(data=means.T, columns=[target_timestamp], index=symbols)
-        # conf_low_pd = pd.DataFrame(data=conf_low.T, columns=[target_timestamp], index=symbols)
-        # conf_high_pd = pd.DataFrame(data=conf_high.T, columns=[target_timestamp], index=symbols)
-
         means_series = pd.Series(np.squeeze(means), index=symbols)
         conf_low_series = pd.Series(np.squeeze(conf_low), index=symbols)
         conf_high_series = pd.Series(np.squeeze(conf_high), index=symbols)
@@ -150,6 +162,24 @@ class OraclePrediction:
         self.upper_bound = upper_bound
         self.prediction_timestamp = prediction_timestamp
         self.covariance_matrix = pd.DataFrame()
+        self._feature_sensitivity = {}
+
+    def add_feature_sensitivity(self, feature, sensitivity):
+        """
+        Add feature sensitivity value
+        :param feature:
+        :param sensitivity:
+        :return:
+        """
+        self._feature_sensitivity[feature] = sensitivity
+
+    @property
+    def features_sensitivity(self):
+        """
+        returns the dict with features as key and value as a sensitivity
+        :return dict:
+        """
+        return self._feature_sensitivity
 
     def __repr__(self):
         return "<Oracle prediction: {}>".format(self.__dict__)

@@ -8,11 +8,14 @@ import os
 import pytz
 
 from alphai_delphi import Scheduler, OraclePerformance, Controller
-from alphai_delphi.data_source.synthetic_data_source import SyntheticDataSource
 
+from alphai_metacrocubot_oracle.datasource import DataSource
 from alphai_metacrocubot_oracle.oracle import MetaCrocubotOracle
 
+CALENDAR_NAME = "JSEEOM"
+
 OUTPUT_DIR = tempfile.TemporaryDirectory().name
+RESOURCES_DIR = os.path.join(os.path.dirname(__file__), '..', 'resources')
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -23,11 +26,11 @@ class TestMetaCrocubot(unittest.TestCase):
         oracle_configuration = {
             'prediction_delta': {
                 'unit': 'days',
-                'value': 10
+                'value': 3
             },
             'training_delta': {
                 'unit': 'days',
-                'value': 20
+                'value': 12
             },
             'prediction_horizon': {
                 'unit': 'days',
@@ -36,17 +39,17 @@ class TestMetaCrocubot(unittest.TestCase):
             'data_transformation': {
                 'feature_config_list': [
                     {
-                        'name': 'close',
+                        'name': 'Returns',
                         'transformation': {
-                            'name': 'log-return'
+                            'name': 'value'
                         },
-                        'normalization': 'standard',
+                        'normalization': None,
                         'is_target': True,
                         'local': False,
                         'length': 5
                     },
                 ],
-                'features_ndays': 10,
+                'features_ndays': 5,
                 'features_resample_minutes': 15,
                 'fill_limit': 5,
             },
@@ -74,8 +77,9 @@ class TestMetaCrocubot(unittest.TestCase):
                 'normalise_per_series': False,
 
                 # Topology
-                'n_series': 3,
-                'n_assets': 3,
+                'n_series': 324,
+                'n_assets': 324,
+                'n_correlated_series': 1,
                 'n_features_per_series': 271,
                 'n_forecasts': 1,
                 'n_classification_bins': 12,
@@ -96,52 +100,41 @@ class TestMetaCrocubot(unittest.TestCase):
                 'wide_prior_std': 1.2,
                 'narrow_prior_std': 0.05,
                 'spike_slab_weighting': 0.5,
-            },
-            "universe": {
-                "method": "liquidity",
-                "n_assets": 3,
-                "ndays_window": 5,
-                "update_frequency": 'weekly',
-                "avg_function": 'median',
-                "dropna": False
-            },
+            }
         }
 
         scheduling_configuration = {
-            "prediction_frequency": {"frequency_type": "WEEKLY", "days_offset": 0, "minutes_offset": 75},
-            "training_frequency": {"frequency_type": "WEEKLY", "days_offset": 0, "minutes_offset": 60}
+            "prediction_frequency": {"frequency_type": "MONTHLY", "days_offset": -1, "minutes_offset": 0},
+            "training_frequency": {"frequency_type": "MONTHLY", "days_offset": -1, "minutes_offset": 0}
         }
 
         oracle = MetaCrocubotOracle(
-            calendar_name="NYSE",
+            calendar_name=CALENDAR_NAME,
             oracle_configuration=oracle_configuration,
             scheduling_configuration=scheduling_configuration
         )
 
-        simulation_start = datetime.datetime(2009, 1, 5, tzinfo=pytz.utc)
-        simulation_end = datetime.datetime(2009, 1, 31, tzinfo=pytz.utc)
-        calendar_name = 'NYSE'
+        simulation_start = datetime.datetime(2007, 12, 31, tzinfo=pytz.utc)
+        simulation_end = datetime.datetime(2008, 12, 31, tzinfo=pytz.utc)
 
         scheduler = Scheduler(
             simulation_start,
             simulation_end,
-            calendar_name,
+            CALENDAR_NAME,
             oracle.prediction_frequency,
             oracle.training_frequency,
         )
 
         oracle_performance = OraclePerformance(OUTPUT_DIR, 'oracle')
 
-        datasource = SyntheticDataSource({
-            "start_date": datetime.datetime(2006, 12, 31),
-            "end_date": datetime.datetime(2011, 12, 31),
-            "n_sin_series": 3
+        datasource = DataSource({
+            'data_file': os.path.join(RESOURCES_DIR, 'test_stock_data.hdf5')
         })
 
         controller = Controller(
             configuration={
-                'start_date': '2009-01-05',
-                'end_date': '2009-01-31'
+                'start_date': simulation_start.strftime('%Y-%m-%d'),
+                'end_date': simulation_end.strftime('%Y-%m-%d')
             },
             oracle=oracle,
             scheduler=scheduler,
@@ -163,7 +156,3 @@ class TestMetaCrocubot(unittest.TestCase):
 
         for filename in expected_files:
             self.assertTrue(os.path.isfile(os.path.join(OUTPUT_DIR, filename)))
-
-
-
-
