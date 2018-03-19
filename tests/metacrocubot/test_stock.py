@@ -115,7 +115,7 @@ class TestMetaCrocubot(unittest.TestCase):
         )
 
         simulation_start = datetime.datetime(2007, 12, 31, tzinfo=pytz.utc)
-        simulation_end = datetime.datetime(2010, 9, 29, tzinfo=pytz.utc)
+        simulation_end = datetime.datetime(2008, 12, 31, tzinfo=pytz.utc)
 
         scheduler = Scheduler(
             simulation_start,
@@ -133,8 +133,8 @@ class TestMetaCrocubot(unittest.TestCase):
 
         controller = Controller(
             configuration={
-                'start_date': '2007-12-31',
-                'end_date': '2019-09-29'
+                'start_date': simulation_start.strftime('%Y-%m-%d'),
+                'end_date': simulation_end.strftime('%Y-%m-%d')
             },
             oracle=oracle,
             scheduler=scheduler,
