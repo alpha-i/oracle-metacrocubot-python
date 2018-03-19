@@ -406,8 +406,3 @@ class TestDataSource(unittest.TestCase):
 
         assert values['HCI'] == -0.292391161
         assert values['SNT'] == -0.137834485
-
-
-
-
-

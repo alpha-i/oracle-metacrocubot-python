@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import pandas as pd
 
 from alphai_delphi import AbstractDataSource
@@ -41,9 +39,6 @@ class DataSource(AbstractDataSource):
         symbol_data = feature_data[symbol_list]
 
         return symbol_data.loc[current_datetime]
-
-
-
 
     @property
     def start(self):

@@ -163,7 +163,3 @@ class TestMetaCrocubot(unittest.TestCase):
 
         for filename in expected_files:
             self.assertTrue(os.path.isfile(os.path.join(OUTPUT_DIR, filename)))
-
-
-
-
