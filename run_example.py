@@ -1,6 +1,7 @@
 import os
-
+import logging
 import datetime
+import warnings
 
 import pytz
 from alphai_delphi import OraclePerformance, Controller, Scheduler
@@ -8,11 +9,39 @@ from alphai_delphi import OraclePerformance, Controller, Scheduler
 from alphai_metacrocubot_oracle.datasource import DataSource
 from alphai_metacrocubot_oracle.oracle import MetaCrocubotOracle
 
+from tests.resources.feature_list import feature_list
+
+warnings.filterwarnings(action='once')
+
+filename = "{}_execution.log".format(datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+log_file_path = os.path.join(os.path.dirname(__file__), 'logs', filename)
+logging.basicConfig(level=logging.INFO, filename=log_file_path)
+
 CALENDAR_NAME = "JSEEOM"
 
-OUTPUT_DIR = '/path/to/outputdir'
+OUTPUT_DIR = '/media/data/WORK/oldmutual'
 
 RESOURCES_DIR = os.path.join(os.path.dirname(__file__), 'tests', 'resources')
+
+TARGET_FEATURE = 'Returns'
+
+feature_config_list = []
+
+feature_blacklist = {'Shares'}
+feature_whitelist = set(feature_list) - set(feature_blacklist)
+for feature in feature_whitelist:
+    feature_config = {
+        'name': feature,
+        'transformation': {
+            'name': 'value'
+        },
+        'normalization': None,
+        'is_target': feature == TARGET_FEATURE,
+        'local': False,
+        'length': 5
+    }
+
+    feature_config_list.append(feature_config)
 
 oracle_configuration = {
     'prediction_delta': {
@@ -28,18 +57,7 @@ oracle_configuration = {
         'value': 1
     },
     'data_transformation': {
-        'feature_config_list': [
-            {
-                'name': 'Returns',
-                'transformation': {
-                    'name': 'value'
-                },
-                'normalization': None,
-                'is_target': True,
-                'local': False,
-                'length': 5
-            },
-        ],
+        'feature_config_list': feature_config_list,
         'features_ndays': 5,
         'features_resample_minutes': 15,
         'fill_limit': 5,
@@ -105,8 +123,8 @@ oracle = MetaCrocubotOracle(
     scheduling_configuration=scheduling_configuration
 )
 
-simulation_start = datetime.datetime(2007, 12, 31, tzinfo=pytz.utc)
-simulation_end = datetime.datetime(2010, 9, 29, tzinfo=pytz.utc)
+simulation_start = datetime.datetime(2007, 11, 30, tzinfo=pytz.utc)
+simulation_end = datetime.datetime(2008, 11, 30, tzinfo=pytz.utc)
 
 scheduler = Scheduler(
     simulation_start,

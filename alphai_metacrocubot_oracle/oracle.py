@@ -7,6 +7,7 @@ import alphai_crocubot_oracle.crocubot.evaluate as crocubot_eval
 import pandas as pd
 from alphai_crocubot_oracle.oracle import CrocubotOracle
 from alphai_feature_generation.transformation import GymDataTransformation
+from copy import deepcopy
 
 
 class MetaCrocubotOracle(CrocubotOracle):
@@ -60,20 +61,6 @@ class MetaCrocubotOracle(CrocubotOracle):
         pass
 
     def predict(self, data, current_timestamp, target_timestamp):
-
-        prediction_result = self._do_predict(data, current_timestamp, target_timestamp)
-
-        # loop throught the feature, create a prediction to add sensitivity
-        # for feature in feature_to_calculate
-        #   feature_data = deepcopy(data)
-        #   del feature_data[feature]
-        #   result = self._do_predict(data, current_timestamp, target_timestamp)
-        #   sensitivity = self._calculate_sensitivity(prediction_result, result)
-        #   prediction_result.add_feature_sensitivity(feature, sensitivity)
-
-        return prediction_result
-
-    def _do_predict(self, data, current_timestamp, target_timestamp):
         """
              Main method that gives us a prediction after the training phase is done
 
@@ -96,9 +83,45 @@ class MetaCrocubotOracle(CrocubotOracle):
         latest_train_file = self._train_file_manager.latest_train_filename(current_timestamp)
         predict_x, symbols, prediction_timestamp, target_timestamp = self._data_transformation.create_predict_data(data)
 
-        logging.info('Predicting mean values.')
-        start_time = timer()
+        feature_list = list(predict_x.keys())
+
         predict_x = self._preprocess_inputs(predict_x)
+
+        logging.info('Executing Main Prediction')
+        prediction_result = self._do_single_prediction(
+            predict_x,
+            latest_train_file,
+            symbols,
+            current_timestamp,
+            target_timestamp
+        )
+
+        for i in range(predict_x.shape[3]):
+            feature_name = feature_list[i]
+            perturbed_x = deepcopy(predict_x)
+            perturbed_x[:, :, :, i] = 0
+
+            logging.info('Executing sensitivity prediction for feature {}'.format(feature_name))
+            result = self._do_single_prediction(
+                perturbed_x,
+                latest_train_file,
+                symbols,
+                current_timestamp,
+                target_timestamp
+            )
+
+            sensitivity = np.abs((result.mean_vector - prediction_result.mean_vector)/prediction_result.mean_vector)
+            sensitivity = np.nanmean(sensitivity)
+            logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
+
+            prediction_result.add_feature_sensitivity(feature_name, sensitivity)
+
+        return prediction_result
+
+    def _do_single_prediction(self, predict_x, latest_train_file, symbols, current_timestamp,
+                              target_timestamp):
+
+        start_time = timer()
 
         if self._topology is None:
             n_timesteps = predict_x.shape[2]
@@ -140,7 +163,7 @@ class MetaCrocubotOracle(CrocubotOracle):
         if not np.isfinite(means).all():
             logging.warning('Means found to contain non-finite values.')
 
-        logging.info('Samples from predicted means: {}'.format(means[0:10]))
+        logging.debug('Samples from predicted means: {}'.format(means.flatten()[0:10]))
 
 
 class OraclePrediction:
