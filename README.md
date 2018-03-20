@@ -2,7 +2,7 @@
 
 ### Create conda environment
 ```bash
-$ conda create -n metacrocubot python=3.5
+$ conda create -n metacrocubot python=3.5 numpy
 $ source activate metacrocubot
 ```
 
