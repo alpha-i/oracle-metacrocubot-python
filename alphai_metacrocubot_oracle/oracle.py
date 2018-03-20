@@ -101,21 +101,25 @@ class MetaCrocubotOracle(CrocubotOracle):
             perturbed_x = deepcopy(predict_x)
             perturbed_x[:, :, :, i] = 0
 
-            logging.info('Executing sensitivity prediction for feature {}'.format(feature_name))
-            perturbed_result = self._do_single_prediction(
-                perturbed_x,
-                latest_train_file,
-                symbols,
-                current_timestamp,
-                target_timestamp
-            )
+            try:
+                logging.info('Executing sensitivity prediction for feature {}'.format(feature_name))
+                perturbed_result = self._do_single_prediction(
+                    perturbed_x,
+                    latest_train_file,
+                    symbols,
+                    current_timestamp,
+                    target_timestamp
+                )
 
-            perturbation = perturbed_result.mean_vector - prediction_result.mean_vector
-            sensitivity = np.nanmean(np.abs(perturbation))
-            logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
+                perturbation = perturbed_result.mean_vector - prediction_result.mean_vector
+                sensitivity = np.nanmean(np.abs(perturbation))
+                logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
 
-            prediction_result.add_feature_sensitivity(feature_name, sensitivity)
-
+                prediction_result.add_feature_sensitivity(feature_name, sensitivity)
+            except Exception as e:
+                logging.error("Error calculating sensitivy for feature [{}]. Reason: {}".format(
+                    feature_name, e
+                ))
         return prediction_result
 
     def _do_single_prediction(self, predict_x, latest_train_file, symbols, current_timestamp,
