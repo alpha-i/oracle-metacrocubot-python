@@ -102,7 +102,7 @@ class MetaCrocubotOracle(CrocubotOracle):
             perturbed_x[:, :, :, i] = 0
 
             logging.info('Executing sensitivity prediction for feature {}'.format(feature_name))
-            result = self._do_single_prediction(
+            perturbed_result = self._do_single_prediction(
                 perturbed_x,
                 latest_train_file,
                 symbols,
@@ -110,8 +110,8 @@ class MetaCrocubotOracle(CrocubotOracle):
                 target_timestamp
             )
 
-            sensitivity = np.abs((result.mean_vector - prediction_result.mean_vector)/prediction_result.mean_vector)
-            sensitivity = np.nanmean(sensitivity)
+            perturbation = perturbed_result.mean_vector - prediction_result.mean_vector
+            sensitivity = np.nanmean(np.abs(perturbation))
             logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
 
             prediction_result.add_feature_sensitivity(feature_name, sensitivity)
