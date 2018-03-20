@@ -115,7 +115,7 @@ class TestMetaCrocubot(unittest.TestCase):
         )
 
         simulation_start = datetime.datetime(2007, 12, 31, tzinfo=pytz.utc)
-        simulation_end = datetime.datetime(2008, 12, 31, tzinfo=pytz.utc)
+        simulation_end = datetime.datetime(2008, 4, 30, tzinfo=pytz.utc)
 
         scheduler = Scheduler(
             simulation_start,
