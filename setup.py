@@ -11,7 +11,7 @@ setup(
     packages=find_packages(exclude=['doc', 'tests*']),
     install_requires=[
         'alphai_delphi>=2.0.0,<3.0.0',
-        'alphai_crocubot_oracle==4.0.0'
+        'alphai_crocubot_oracle==4.0.1'
 
     ],
     dependency_links=[
