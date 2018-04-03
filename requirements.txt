@@ -1,4 +1,4 @@
 --extra-index-url https://pypi.fury.io/reW6hdjFCrSbpo3ehrBu/alpha-i/
 
-alphai_crocubot_oracle==4.0.0
+alphai_crocubot_oracle==4.0.1
 alphai_delphi>=2.1.0,<3.0.0
