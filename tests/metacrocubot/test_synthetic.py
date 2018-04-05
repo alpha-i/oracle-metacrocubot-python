@@ -154,7 +154,7 @@ class TestMetaCrocubot(unittest.TestCase):
         expected_files = ["oracle_correlation_coefficient.pdf",
                           "oracle_cumulative_returns.pdf",
                           "oracle_data_table.csv",
-                          "oracle_oracle_results_actuals.hdf5",
+                          "oracle_oracle_results_returns_actuals.hdf5",
                           "oracle_oracle_results_covariance_matrix.hdf5",
                           "oracle_oracle_results_mean_vector.hdf5",
                           "oracle_performance_table.csv",

@@ -9,6 +9,8 @@ from alphai_crocubot_oracle.oracle import CrocubotOracle
 from alphai_feature_generation.transformation import GymDataTransformation
 from copy import deepcopy
 
+from alphai_metacrocubot_oracle.result import FeatureSensitivity, OraclePrediction
+
 
 class MetaCrocubotOracle(CrocubotOracle):
 
@@ -112,10 +114,10 @@ class MetaCrocubotOracle(CrocubotOracle):
                 )
 
                 perturbation = perturbed_result.mean_vector - prediction_result.mean_vector
-                sensitivity = np.nanmean(np.abs(perturbation))
-                logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
 
-                prediction_result.add_feature_sensitivity(feature_name, sensitivity)
+                logging.info("Calculated sensitivity for feature [{}]".format(feature_name))
+
+                prediction_result.add_feature_sensitivity(FeatureSensitivity(feature_name, perturbation))
             except Exception as e:
                 logging.error("Error calculating sensitivy for feature [{}]. Reason: {}".format(
                     feature_name, e
@@ -170,43 +172,3 @@ class MetaCrocubotOracle(CrocubotOracle):
         logging.debug('Samples from predicted means: {}'.format(means.flatten()[0:10]))
 
 
-class OraclePrediction:
-    def __init__(self, mean_vector, lower_bound, upper_bound, prediction_timestamp, target_timestamp):
-        """ Container for the oracle predictions.
-
-        :param mean_vector: Prediction values for various series at various times
-        :type mean_vector: pd.DataFrame
-        :param lower_bound: Lower edge of the requested confidence interval
-        :type lower_bound: pd.DataFrame
-        :param upper_bound: Upper edge of the requested confidence interval
-        :type upper_bound: pd.DataFrame
-        :param prediction_timestamp: Timestamp when the prediction was made
-        :type target_timestamp: datetime
-        """
-        self.target_timestamp = target_timestamp
-        self.mean_vector = mean_vector
-        self.lower_bound = lower_bound
-        self.upper_bound = upper_bound
-        self.prediction_timestamp = prediction_timestamp
-        self.covariance_matrix = pd.DataFrame()
-        self._feature_sensitivity = {}
-
-    def add_feature_sensitivity(self, feature, sensitivity):
-        """
-        Add feature sensitivity value
-        :param feature:
-        :param sensitivity:
-        :return:
-        """
-        self._feature_sensitivity[feature] = sensitivity
-
-    @property
-    def features_sensitivity(self):
-        """
-        returns the dict with features as key and value as a sensitivity
-        :return dict:
-        """
-        return self._feature_sensitivity
-
-    def __repr__(self):
-        return "<Oracle prediction: {}>".format(self.__dict__)
