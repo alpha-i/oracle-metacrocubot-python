@@ -9,6 +9,8 @@ from alphai_crocubot_oracle.oracle import CrocubotOracle
 from alphai_feature_generation.transformation import GymDataTransformation
 from copy import deepcopy
 
+from alphai_metacrocubot_oracle.result import FeatureSensitivity, OraclePrediction
+
 
 class MetaCrocubotOracle(CrocubotOracle):
 
@@ -60,7 +62,7 @@ class MetaCrocubotOracle(CrocubotOracle):
     def verify_pricing_data(self, predict_data):
         pass
 
-    def predict(self, data, current_timestamp, target_timestamp):
+    def predict(self, data, current_timestamp, *args, **kwargs):
         """
              Main method that gives us a prediction after the training phase is done
 
@@ -68,8 +70,6 @@ class MetaCrocubotOracle(CrocubotOracle):
              :type data: dict
              :param current_timestamp: The timestamp of the time when the prediction is executed
              :type current_timestamp: datetime.datetime
-             :param target_timestamp: The timestamp of the point in time we are predicting
-             :type target_timestamp: datetime.datetime
              :return: Mean vector or covariance matrix together with the timestamp of the prediction
              :rtype: PredictionResult
              """
@@ -112,10 +112,10 @@ class MetaCrocubotOracle(CrocubotOracle):
                 )
 
                 perturbation = perturbed_result.mean_vector - prediction_result.mean_vector
-                sensitivity = np.nanmean(np.abs(perturbation))
-                logging.info("Sensitivity for feature [{}]: {}".format(feature_name, sensitivity))
 
-                prediction_result.add_feature_sensitivity(feature_name, sensitivity)
+                logging.info("Calculated sensitivity for feature [{}]".format(feature_name))
+
+                prediction_result.add_feature_sensitivity(FeatureSensitivity(feature_name, perturbation))
             except Exception as e:
                 logging.error("Error calculating sensitivy for feature [{}]. Reason: {}".format(
                     feature_name, e
@@ -158,7 +158,8 @@ class MetaCrocubotOracle(CrocubotOracle):
 
         return OraclePrediction(means_series, conf_low_series, conf_high_series, current_timestamp, target_timestamp)
 
-    def log_validity_of_predictions(self, means, conf_low, conf_high):
+    @staticmethod
+    def log_validity_of_predictions(means, conf_low, conf_high):
         """ Checks that the network outputs are sensible. """
 
         if not (np.isfinite(conf_low).all() and np.isfinite(conf_high).all()):
@@ -168,45 +169,3 @@ class MetaCrocubotOracle(CrocubotOracle):
             logging.warning('Means found to contain non-finite values.')
 
         logging.debug('Samples from predicted means: {}'.format(means.flatten()[0:10]))
-
-
-class OraclePrediction:
-    def __init__(self, mean_vector, lower_bound, upper_bound, prediction_timestamp, target_timestamp):
-        """ Container for the oracle predictions.
-
-        :param mean_vector: Prediction values for various series at various times
-        :type mean_vector: pd.DataFrame
-        :param lower_bound: Lower edge of the requested confidence interval
-        :type lower_bound: pd.DataFrame
-        :param upper_bound: Upper edge of the requested confidence interval
-        :type upper_bound: pd.DataFrame
-        :param prediction_timestamp: Timestamp when the prediction was made
-        :type target_timestamp: datetime
-        """
-        self.target_timestamp = target_timestamp
-        self.mean_vector = mean_vector
-        self.lower_bound = lower_bound
-        self.upper_bound = upper_bound
-        self.prediction_timestamp = prediction_timestamp
-        self.covariance_matrix = pd.DataFrame()
-        self._feature_sensitivity = {}
-
-    def add_feature_sensitivity(self, feature, sensitivity):
-        """
-        Add feature sensitivity value
-        :param feature:
-        :param sensitivity:
-        :return:
-        """
-        self._feature_sensitivity[feature] = sensitivity
-
-    @property
-    def features_sensitivity(self):
-        """
-        returns the dict with features as key and value as a sensitivity
-        :return dict:
-        """
-        return self._feature_sensitivity
-
-    def __repr__(self):
-        return "<Oracle prediction: {}>".format(self.__dict__)
