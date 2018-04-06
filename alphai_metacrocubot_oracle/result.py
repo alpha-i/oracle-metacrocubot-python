@@ -9,7 +9,7 @@ class FeatureSensitivity:
     def __init__(self, feature, perturbations):
         self._feature = feature
         sensitivities = np.abs(perturbations)
-        self._per_share_sensitivity = sensitivities
+        self._per_symbol_sensitivity = sensitivities
         self._average_sensitivity = np.nanmean(sensitivities)
 
     @property
@@ -21,8 +21,8 @@ class FeatureSensitivity:
         return self._average_sensitivity
 
     @property
-    def per_share_sensitivity(self):
-        return self._per_share_sensitivity
+    def per_symbol_sensitivity(self):
+        return self._per_symbol_sensitivity
 
 
 class OraclePrediction(AbstractPredictionResult):
@@ -64,14 +64,14 @@ class OraclePrediction(AbstractPredictionResult):
                 self._feature_sensitivity.items()}
 
     @property
-    def features_per_share_sensitivity(self):
-        return {feature_name: sensitivity.per_share_sensitivity for feature_name, sensitivity in
+    def features_per_symbol_sensitivity(self):
+        return {feature_name: sensitivity.per_symbol_sensitivity for feature_name, sensitivity in
                 self._feature_sensitivity.items()}
 
     @property
     def custom_metrics(self):
         return {
-            'per_share_sensitivity': self.features_per_share_sensitivity,
+            'per_symbol_sensitivity': self.features_per_symbol_sensitivity,
             'average_sensitivity': self.features_average_sensitivity
         }
 

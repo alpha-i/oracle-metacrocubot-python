@@ -158,7 +158,8 @@ class MetaCrocubotOracle(CrocubotOracle):
 
         return OraclePrediction(means_series, conf_low_series, conf_high_series, current_timestamp, target_timestamp)
 
-    def log_validity_of_predictions(self, means, conf_low, conf_high):
+    @staticmethod
+    def log_validity_of_predictions(means, conf_low, conf_high):
         """ Checks that the network outputs are sensible. """
 
         if not (np.isfinite(conf_low).all() and np.isfinite(conf_high).all()):
