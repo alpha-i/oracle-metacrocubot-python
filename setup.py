@@ -4,7 +4,7 @@ from setuptools import find_packages
 
 setup(
     name='alphai_metacrocubot_oracle',
-    version='0.0.1',
+    version='1.0.0',
     description='Alpha-I Crocubot',
     author='Fergus Simpson',
     author_email='fergus.simpson@alpha-i.co',
