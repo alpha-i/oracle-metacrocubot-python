@@ -9,7 +9,7 @@ class FeatureSensitivity:
     def __init__(self, feature, share_sensitivity):
         self._feature = feature
         self._per_share_sensitivity = share_sensitivity
-        self._average_sensitivity = np.nanmean(np.abs(share_sensitivity))
+        self._average_sensitivity = np.nanmean(share_sensitivity)
 
     @property
     def feature(self):
