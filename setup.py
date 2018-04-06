@@ -10,7 +10,7 @@ setup(
     author_email='fergus.simpson@alpha-i.co',
     packages=find_packages(exclude=['doc', 'tests*']),
     install_requires=[
-        'alphai_delphi>=2.0.0,<3.0.0',
+        'alphai_delphi==3.0.0-dev',
         'alphai_crocubot_oracle==4.0.1'
 
     ],
