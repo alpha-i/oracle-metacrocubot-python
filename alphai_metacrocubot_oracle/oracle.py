@@ -170,5 +170,3 @@ class MetaCrocubotOracle(CrocubotOracle):
             logging.warning('Means found to contain non-finite values.')
 
         logging.debug('Samples from predicted means: {}'.format(means.flatten()[0:10]))
-
-
