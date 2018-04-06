@@ -1,4 +1,5 @@
 --extra-index-url https://pypi.fury.io/reW6hdjFCrSbpo3ehrBu/alpha-i/
 
 alphai_crocubot_oracle==4.0.1
-alphai_delphi>=3.0.0,<4.0.0
+-e git+git@github.com:alpha-i/tool-delphi-python.git@8bc9efb6dc8cbeff2154857a956cdc2cf9dfe677#egg=alphai_delphi
+
