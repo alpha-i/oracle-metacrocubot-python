@@ -62,7 +62,7 @@ class MetaCrocubotOracle(CrocubotOracle):
     def verify_pricing_data(self, predict_data):
         pass
 
-    def predict(self, data, current_timestamp, target_timestamp):
+    def predict(self, data, current_timestamp, *args, **kwargs):
         """
              Main method that gives us a prediction after the training phase is done
 
@@ -70,8 +70,6 @@ class MetaCrocubotOracle(CrocubotOracle):
              :type data: dict
              :param current_timestamp: The timestamp of the time when the prediction is executed
              :type current_timestamp: datetime.datetime
-             :param target_timestamp: The timestamp of the point in time we are predicting
-             :type target_timestamp: datetime.datetime
              :return: Mean vector or covariance matrix together with the timestamp of the prediction
              :rtype: PredictionResult
              """
