@@ -6,10 +6,11 @@ from alphai_delphi.oracle.abstract_oracle import AbstractPredictionResult
 
 class FeatureSensitivity:
 
-    def __init__(self, feature, share_sensitivity):
+    def __init__(self, feature, perturbations):
         self._feature = feature
-        self._per_share_sensitivity = share_sensitivity
-        self._average_sensitivity = np.nanmean(share_sensitivity)
+        sensitivities = np.abs(perturbations)
+        self._per_share_sensitivity = sensitivities
+        self._average_sensitivity = np.nanmean(sensitivities)
 
     @property
     def feature(self):
